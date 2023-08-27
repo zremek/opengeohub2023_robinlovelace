@@ -125,7 +125,7 @@ poland = world |>
 world_centroids = world |>
     st_centroid()
 country_centroids = world_centroids |>
-  st_filter(poland, .predicate = st_is_within_distance, dist = 2e5)
+  st_filter(poland, .predicate = st_is_within_distance, dist = 2e5) # 2e5 == 2 * 10^5
 countries = world |>
   filter(name_long %in% country_centroids$name_long)
 countries_df = countries |>
@@ -381,7 +381,6 @@ poi_sf = sf::st_as_sf(poi_df, coords = c("lon", "lat"))
 sf::st_crs(poi_sf) = "EPSG:4326"
 ```
 
-
 ```{r}
 #| eval: false
 # column: screen-inset-shaded
@@ -412,7 +411,6 @@ tm_shape(poi_sf) + tm_bubbles(popup.vars = "name")
 The interactive maps below illustrate the outputs of the preceding map-making commands, highlighting the convenience of using `{tmap}`, which requires far fewer lines of code, although `{leaflet}` and other low-level map-making packages can offer more control.
 
 ::: {#fig-interactive layout-ncol="2"}
-
 ```{r}
 #| column: screen-inset-shaded
 #| layout-ncol: 2
@@ -432,7 +430,6 @@ tm_shape(poi_sf) +
 ```
 
 Interactive maps of 4 locations in Poznan made with 7 lines of code with `{leaflet}` (left), and 1 line of `{tmap}` code (right).
-
 :::
 
 Turn off the interactive mode as follows.
@@ -563,13 +560,12 @@ tmap_animation(m_faceted, delay = 10, filename = "gpx.gif")
 
 ![](gpx.gif)
 
-
 ## Exercises
 
-1. Create `sf` objects representing the following features in Poznan (hint: try using functions for geocoding such as `stplanr::geo_code()` or `tmaptools::geocode_OSM()`):
+1.  Create `sf` objects representing the following features in Poznan (hint: try using functions for geocoding such as `stplanr::geo_code()` or `tmaptools::geocode_OSM()`):
     -   The main train station
     -   The airport
-2. Identify interesting features in the surrounding area from OSM and plot them in static and interactive maps.
+2.  Identify interesting features in the surrounding area from OSM and plot them in static and interactive maps.
 
 # `tidyverse` + `geos`
 
@@ -810,9 +806,9 @@ pois_joined
 ### Exercises
 
 1.  Create a static map of the stops in Poznan, using the `stops` object created above, with a mapping package of your preference. Set the colour of each stop by `zone_id`.
-    - Bonus: also create an interactive map.
-2. **Advanced**: Reproduce the results presented above by following the Python code at [geobgu.xyz/presentations/p_2023_ogh/01-vector.html](https://geobgu.xyz/presentations/p_2023_ogh/01-vector.html).
-    - Which language do you prefer for the types of task presented here and why?
+    -   Bonus: also create an interactive map.
+2.  **Advanced**: Reproduce the results presented above by following the Python code at [geobgu.xyz/presentations/p_2023_ogh/01-vector.html](https://geobgu.xyz/presentations/p_2023_ogh/01-vector.html).
+    -   Which language do you prefer for the types of task presented here and why?
 
 ## Raster data example
 
@@ -835,7 +831,7 @@ terra::plot(src, col = gray.colors(10))
 
 We will translate the following Python code to R:
 
-```python
+``` python
 files = glob.glob('data/hls/*.tiff')
 ```
 
@@ -887,7 +883,6 @@ r_to_plot[r_rgb < bottom_01pct] = bottom_01pct
 ```
 
 ::: {#fig-terra-plot-rgb-clamp layout-ncol="2"}
-
 ```{r}
 #| layout-ncol: 2
 # summary(r_stretch)
@@ -896,7 +891,6 @@ plotRGB(r_to_plot)
 ```
 
 Plotting a RGB raster layer with terra, with outliers handled with `stretch()` (left) and manually (right)
-
 :::
 
 Save the combined raster as follows:
@@ -941,12 +935,12 @@ tm_shape(stretch(r_cropped[[c("Red", "Green", "Blue")]], minq = 0.001, maxq= 0.9
 
 ### Exercises
 
-1. Experiment with arguments passed to `clamp()`, `stretch()` and `plotRGB()` to see how they affect the output.
-2. Try plotting the raster in another program like QGIS, which looks better?
-3. **Advanced**: Reproduce the results presented above by following the Python code at [geobgu.xyz/presentations/p_2023_ogh/02-raster.html](https://geobgu.xyz/presentations/p_2023_ogh/02-raster.html).
-    - Which language do you prefer for the types of task presented here and why?
-4. **Advanced**: Try plotting the raster with `{ggplot2}` and `{tmap}`.
-    - Which do you prefer and why?
+1.  Experiment with arguments passed to `clamp()`, `stretch()` and `plotRGB()` to see how they affect the output.
+2.  Try plotting the raster in another program like QGIS, which looks better?
+3.  **Advanced**: Reproduce the results presented above by following the Python code at [geobgu.xyz/presentations/p_2023_ogh/02-raster.html](https://geobgu.xyz/presentations/p_2023_ogh/02-raster.html).
+    -   Which language do you prefer for the types of task presented here and why?
+4.  **Advanced**: Try plotting the raster with `{ggplot2}` and `{tmap}`.
+    -   Which do you prefer and why?
 
 # Other tidy packages
 
@@ -1015,8 +1009,6 @@ bench::mark(check = FALSE,
 # Further reading
 
 For more on raster data see https://kadyb.github.io/OGH2023/Clustering.html
-
-
 
 The following free and open access resources provide a strong foundation for further learning in this space.
 
