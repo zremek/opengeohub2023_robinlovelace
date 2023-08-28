@@ -8,3 +8,4 @@ data/
 data.zip
 *.gpkg
 .DS_Store
+*_files/
