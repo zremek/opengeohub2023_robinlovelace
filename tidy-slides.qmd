@@ -201,12 +201,9 @@ Aim: cross-compare approaches
 Source: [Python version](https://geobgu.xyz/presentations/p_2023_ogh/01-vector.html#plotting-1) and [R version](https://ogh23.robinlovelace.net/tidy#worked-example-data-from-poznan)
 
 ::: {layout-ncol="2"}
-
 ![](images/paste-15.png)
 
 ![](images/paste-16.png)
-
 :::
-
 
 # References

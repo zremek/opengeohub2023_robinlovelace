@@ -8,6 +8,42 @@ number-sections: true
 bibliography: references.bib
 ---
 
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
 ```{r setup-knitr}
 # knitr::opts_chunk$set(cache = TRUE)
 ```

@@ -1,0 +1,221 @@
+---
+title: "notes tidy session"
+author: "Remek"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Initial notes
+
+The term *geocomputation* was coined at the university of Leeds
+
+www.npt.scot online app for bike traffic modelling (where to build bike lanes?)
+
+Author with Jakub Nowosad <https://r.geocompx.org/>
+
+```{r}
+pkgs = c(
+  "sf",
+  "tidyverse",
+  "geos",
+  "ggspatial",
+  "spData"
+)
+
+sapply(pkgs, require, character.only = TRUE)
+
+```
+
+Check spData
+
+```{r}
+library(geos)
+library(tidyverse)
+library(sf)
+library(spData)
+library(ggspatial)
+
+spData::world %>% names()
+```
+
+Print world object info
+
+```{r}
+world
+```
+
+We have WGS 84.
+
+# Get data for Poland and neighborhoods
+
+```{r}
+poland <- world %>% 
+  filter(name_long == "Poland") %>% 
+  select(name_long, area_km2, pop)
+```
+
+How to remove geometry column?
+It's sticky.
+
+```{r}
+class(poland)
+
+sf::st_drop_geometry(poland) %>% class() # no sf 
+```
+
+```{r}
+plot(poland, max.plot = 1)
+```
+
+*Ask questions on R Spatial Mattermost Channel*
+
+Read about centroids - <https://en.wikipedia.org/wiki/Geographical_centre>
+
+Make centroids and select countries:
+
+```{r}
+?st_centroid
+```
+
+Write my own code from examples in tidy.qdm
+
+\#####################################
+
+# GEOS
+
+GEOS is a backend for sf that does
+
+```{r}
+
+```
+
+Talks about benchmarks - they doesn't really matter as long as we are under few minutes.
+For very large computations use 1% sample and benchmark.
+Computation time is getting cheap, while code writing time is quite expensive, this is something that Hadley says to legitimize tidyverse.
+Tidyverse is slow to run but fast and easy to write.
+Geos is much faster than sf.
+
+# Poznań data example
+
+I did downloading yesterday.
+
+```{r}
+list.files("data/osm")
+```
+
+Read data in
+
+```{r}
+pol_all <- read_sf("./data/osm/gis_osm_transport_a_free_1.shp")
+
+glimpse(pol_all)
+```
+
+Plot
+
+```{r}
+plot(pol_all, max.plot = 1)
+```
+
+ggplot it
+
+```{r}
+pol_all %>% ggplot() + geom_sf()
+```
+Filter
+
+```{r}
+pol_bus <- pol_all %>% 
+  filter(str_detect(name, "bus"))
+
+
+plot(pol_bus)
+```
+Mapview interactive 
+
+```{r}
+library(mapview)
+
+mapview::mapview(pol_all)
+
+
+```
+
+Nice, do it on my data from e5. 
+
+# Buffers TODO
+
+First load text data and convert it to sf 
+```{r}
+stops_raw <- read_csv("./data/gtfs/stops.txt")
+stops <- stops_raw %>% 
+  select(-stop_code) %>% 
+  st_as_sf(., coords = c("stop_lon", "stop_lat"))
+
+st_crs(stops) # check coord ref system - none from txt
+st_crs(stops) = "EPSG:4326" # set common crs
+
+sf::sf_use_s2() # check whether is it working
+
+
+```
+
+Now do buffers 
+
+```{r}
+poi_buffers <- st_buffer(poi_sf, 150)
+```
+
+Plot buffers
+```{r}
+mapview(poi_buffers)
+```
+
+Now subset bus stops in these buffers: 
+```{r}
+stops_in_buffer <- stops[poi_buffers, ] # base R!
+dim(stops_in_buffer)
+```
+Plot? 
+```{r}
+ggplot() +
+  geom_sf(data = stops_in_buffer) + 
+  geom_sf(data = poi_buffers, 
+          fill = "darkgreen", alpha = .4)
+
+```
+
+
+# OSM and data frames 
+
+```{r}
+
+poi_df = tribble(
+  ~name, ~lon, ~lat,
+  "Faculty",        16.9418, 52.4643,
+  "Hotel ForZa",    16.9474, 52.4436,
+  "Hotel Lechicka", 16.9308, 52.4437,
+  "FairPlayce",     16.9497, 52.4604
+)
+poi_sf = sf::st_as_sf(poi_df, coords = c("lon", "lat"))
+sf::st_crs(poi_sf) = "EPSG:4326"
+```
+
+```{r}
+mapview(poi_sf)
+```
+
+# Spatial join 
+
+```{r}
+st_join(poi_buffers, stops)
+```
+
+# Raster data 
+
+Time flies when you have fun... 
+
