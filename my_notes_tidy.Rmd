@@ -147,7 +147,7 @@ mapview::mapview(pol_all)
 
 Nice, do it on my data from e5. 
 
-# Buffers TODO
+# Buffers
 
 First load text data and convert it to sf 
 ```{r}
