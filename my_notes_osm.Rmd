@@ -1,0 +1,151 @@
+---
+title: "my_notes_osm"
+author: "Remek"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(osmdata)
+library(osmextract)
+library(sf)
+library(mapview)
+```
+
+https://ogh23.robinlovelace.net/osm
+
+OSM is Wikipedia for maps. It focuses on human-made infrastructure. It's not even across space, such as there is a stron community in Berlin, but not that stron in North Korea...
+
+https://nptscot.github.io uses OSM data in production on a big scale. It concerns cycling potential. Red colour on the map show potential bootlenecks - where there are difficulties in cycling but high need for cycling. 
+
+https://a-b-street.github.io/osm2streets 
+https://a-b-street.github.io/docs/software/abstreet.html
+https://play.abstreet.org/ use case - city simulation, all on OSM data
+
+# Getting OSM data
+
+https://overpass-turbo.eu is a OSM query tool
+
+## We can get OSM data from Geofabrik 
+
+These are zones that OSM uses to devide the world. They have levels like 1, 2, 3 etc.
+
+```{r}
+par(mar = rep(0, 4))
+
+plot(osmextract::geofabrik_zones[geofabrik_zones$level == 1, "name"],
+     key.pos = NULL, main = NULL)
+```
+
+```{r}
+plot(geofabrik_zones[geofabrik_zones$level == 2, "name"],
+     key.pos = NULL, main = NULL)
+```
+
+```{r}
+plot(geofabrik_zones[geofabrik_zones$level == 3, "name"],
+     key.pos = NULL, main = NULL)
+```
+Other way to get such zones to use _fr pkg. 
+Why to use such zones from pkgs? Because there are API limits, that may be meet when you use one big city. 
+
+```{r}
+plot(openstreetmap_fr_zones[openstreetmap_fr_zones$level == 1, "name"], key.pos = NULL, main = NULL)
+```
+
+```{r}
+ids_2 = openstreetmap_fr_zones$parent %in% "france"
+ids_3 = openstreetmap_fr_zones$parent %in% openstreetmap_fr_zones$id[ids_2]
+
+plot(openstreetmap_fr_zones[ids_2 | ids_3, "name"], key.pos = NULL, main = NULL)
+```
+
+
+bbbike provider is based on https://download.bbbike.org/osm/bbbike/. It is quite different from any other provider supported in osmextract since it contains OSM data for more than 200 cities worldwide. **bbbike provider is the safest choice if you are looking for OSM data relative to a particular city in the world.** 
+
+```{r}
+osmextract::oe_match("Poznań", provider = "bbbike")
+```
+
+```{r}
+osmextract::oe_match("Lodz", provider = "bbbike")
+
+```
+
+# download 
+
+
+```{r}
+poznan <- osmextract::oe_get("Poznan", provider = "bbbike", 
+                             return_gpkg = FALSE)
+```
+
+For the rest of exercises we will use Monaco
+
+```{r}
+monaco_osm_points = oe_get("monaco", provider = "bbbike", layer = "points")
+```
+
+```{r}
+monaco_osm_lines = oe_get("monaco", provider = "bbbike", layer = "lines")
+monaco_osm_mlines = oe_get("monaco", provider = "bbbike", layer = "multilinestrings")
+monaco_osm_polygons = oe_get("monaco", provider = "bbbike", layer = "multipolygons")
+monaco_osm_other = oe_get("monaco", provider = "bbbike", layer = "other_relations")
+```
+
+Check downloaded files
+
+```{r}
+f = list.files(oe_download_directory(), pattern = "monaco", full.names = TRUE)
+f
+monaco = sf::read_sf(f[1])
+monaco = sf::read_sf(f[2], layer = "lines")
+```
+
+
+Remember that the same entity may exist as a point and as a polygon, like supermarket. 
+
+People like mapping roads, so OSM has very well road covergae. 
+
+There is no elevation in OSM. 
+
+OSM has points, lines and relations. After importing with GDAL we get points, lines, multilinestrings, multipoligons and other_relations. We specify these in import functions. 
+
+```{r}
+plot(monaco_osm_lines)
+```
+
+```{r}
+mapview(monaco_osm_lines)
+```
+
+```{r}
+mapview(monaco_osm_mlines)
+```
+
+```{r}
+sf::st_bbox(monaco_osm_mlines)
+```
+
+```{r}
+st_bbox(monaco_osm_lines)
+```
+
+
+```{r}
+ggplot() + 
+  geom_sf(data = select(monaco_osm_lines, highway))
+```
+
+Walkabilty / cyclability https://github.com/acteng/cyclability/ - interesting, maybe **we have illegal trash dumps where the walkability is low?** 
+
+This is an example of 10m resolution buildings raster for EU: https://stac.ecodatacube.eu/lcv_building.residential_osm/collection.json
+
+https://docs.ohsome.org/ohsome-api/stable/response-parameters.html OSM completeness assesment tools, paper https://www.nature.com/articles/s41467-023-39698-6 
+
+
